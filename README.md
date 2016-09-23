@@ -1,6 +1,6 @@
-# KcptunLauncher
+ï»¿# KcptunLauncher
 
-[ÖÐÎÄËµÃ÷](https://github.com/Darnix/KcptunLauncher/wiki/KcptunLauncher-%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E)
+[ä¸­æ–‡è¯´æ˜Ž](https://github.com/Darnix/KcptunLauncher/wiki/KcptunLauncher-%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E)
 
 #### How to use
 
