@@ -1,0 +1,6 @@
+language: csharp
+solution: KcptunLauncher.sln
+install:
+	- sudo apt-get install -y gtk-sharp2
+	- nuget restore KcptunLauncher.sln
+script:

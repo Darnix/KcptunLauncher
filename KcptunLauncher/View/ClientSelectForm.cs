@@ -32,7 +32,7 @@ namespace KcptunLauncher.View
             {
                 MessageBox.Show("file not exists!");
             }
-            System.IO.File.Copy(textBox1.Text, Controller.MainProcessController.KCPTUN_CLIENT_FILE_PATH);
+            System.IO.File.Copy(textBox1.Text, Controller.MainProcessController.KcptunClientFilePath);
             this.Close();
         }
 

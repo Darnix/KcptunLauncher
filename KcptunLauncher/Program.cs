@@ -23,25 +23,25 @@ namespace KcptunLauncher
 
                 if (!mutex.WaitOne(0, false))
                 {
-                    Process[] oldProcesses = Process.GetProcessesByName("KcptunLauncher");
-                    if (oldProcesses.Length > 0)
-                    {
-                        Process oldProcess = oldProcesses[0];
-                    }
-                    MessageBox.Show("KcptunLauncher已运行");
+                    //Process[] oldProcesses = Process.GetProcessesByName("KcptunLauncher");
+                    //if (oldProcesses.Length > 0)
+                    //{
+                    //    Process oldProcess = oldProcesses[0];
+                    //}
+                    MenuControlController.GetInstance().ShowNotification(5, "KcptunLauncher", "程序已运行", ToolTipIcon.Info);
                     return;
                 }
                 
                 Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
-                Application.ThreadException += new ThreadExceptionEventHandler((object sender, ThreadExceptionEventArgs e) =>
+                Application.ThreadException += (sender, e) =>
                 {
                     Logger.GetInstance().SaveCrashLogs(e.Exception);
-                });
-                AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler((object sender, UnhandledExceptionEventArgs e) =>
+                };
+                AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
                 {
                     Logger.GetInstance().SaveCrashLogs(e.ExceptionObject as Exception);
-                });
-                Application.ApplicationExit += new EventHandler((object sender, EventArgs e) => { MenuControlController.GetInstance().Exit(); });
+                };
+                Application.ApplicationExit += (sender, e) => { MenuControlController.GetInstance().Exit(); };
                 MenuControlController.GetInstance();
                 Application.Run();
             }

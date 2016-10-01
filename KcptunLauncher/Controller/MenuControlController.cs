@@ -10,48 +10,57 @@ namespace KcptunLauncher.Controller
 {
     public class MenuControlController
     {
-        private static MenuControlController _Instance;
+        private static MenuControlController _instance;
         public static MenuControlController GetInstance()
         {
-            if (_Instance == null)
-            {
-                _Instance = new MenuControlController();
-            }
-            return _Instance;
+            return _instance ?? (_instance = new MenuControlController());
         }
 
-        private NotifyIcon mNotifyIcon;
-        private ContextMenu mContextMenu;
+        private readonly NotifyIcon _notifyIcon;
+        private ContextMenu _contextMenu;
 
-        private MenuItem enableAllServerItem;
-        private MenuItem disableAllServerItem;
+        private MenuItem _enableAllServerItem;
+        private MenuItem _disableAllServerItem;
 
-        private MenuItem serversItem;
-        private MenuItem configItem;
+        private MenuItem _serversItem;
+        private MenuItem _configItem;
 
-        private MenuItem autoStartupItem;
+        private MenuItem _autoStartupItem;
+        private MenuItem _autoCheckUpdateItem;
 
-        private MenuItem logItem;
+        private MenuItem _logItem;
 
-        private MainProcessController mProcessCtler;
-        private LogForm mLogForm;
+        private MenuItem _aboutItem;
+
+        private readonly MainProcessController _processCtler;
+        private LogForm _logForm;
 
         private MenuControlController()
         {
             Configuration.Load();
             CreateMenu();
 
-            mNotifyIcon = new NotifyIcon();
-            mNotifyIcon.Icon = Resources.icon;
-            mNotifyIcon.Visible = true;
-            mNotifyIcon.ContextMenu = mContextMenu;
+            _notifyIcon = new NotifyIcon
+            {
+                Icon = Resources.icon,
+                Visible = true,
+                ContextMenu = _contextMenu
+            };
+            _notifyIcon.BalloonTipClicked += (sender, e) =>
+            {
+                UpdateController updateCtllr = UpdateController.GetInstance();
+                if (updateCtllr.LatestRelease != null)
+                {
+                    updateCtllr.StartUpdating(updateCtllr.LatestRelease);
+                }
+            };
 
             MainProcessController.KillAllKcptunProcess();
 
-            mProcessCtler = MainProcessController.GetInstance();
-            mProcessCtler.ProcessLogReceivedHandler += new EventHandler(_ProcessLogReceived);
+            _processCtler = MainProcessController.GetInstance();
+            _processCtler.ProcessLogReceivedHandler += mProcessCtler_ProcessLogReceived;
 
-            if (!mProcessCtler.CheckKcptunExists())
+            if (!_processCtler.CheckKcptunExists())
             {
                 Configuration.EnabledServerList.Clear();
                 Configuration.UpdateEnabledServerList();
@@ -63,30 +72,33 @@ namespace KcptunLauncher.Controller
             foreach (Server server in Configuration.Servers)
             {
                 if (Configuration.EnabledServerList.Contains(server.Name))
-                    mProcessCtler.Start(server);
+                    _processCtler.Start(server);
             }
             LoadServersMenuItem();
         }
 
         public void LoadServersMenuItem()
         {
-            while (serversItem.MenuItems[0] != enableAllServerItem)
+            while (_serversItem.MenuItems[0] != _enableAllServerItem)
             {
-                serversItem.MenuItems.RemoveAt(0);
+                _serversItem.MenuItems.RemoveAt(0);
             }
             for (int i = 0, n = Configuration.Servers.Count; i < n; i++)
             {
                 Server mServer = Configuration.Servers[i];
-                MenuItem mServerItem = new MenuItem(mServer.Name, new EventHandler(serverItem_Click));
-                mServerItem.Tag = mServer;
-                mServerItem.Checked = mProcessCtler.CheckKcptunRunning(mServer.Name);
-                serversItem.MenuItems.Add(i, mServerItem);
+                MenuItem mServerItem = new MenuItem(mServer.Name, serverItem_Click)
+                {
+                    Tag = mServer,
+                    Checked = _processCtler.CheckKcptunRunning(mServer.Name)
+                };
+                _serversItem.MenuItems.Add(i, mServerItem);
             }
+            UpdateNotificationText();
         }
 
         public void UpdateServersMenuItemsStatus()
         {
-            foreach (MenuItem mItem in serversItem.MenuItems)
+            foreach (MenuItem mItem in _serversItem.MenuItems)
             {
                 mItem.Checked = Configuration.EnabledServerList.Contains(mItem.Text);
             }
@@ -94,26 +106,60 @@ namespace KcptunLauncher.Controller
 
         private void CreateMenu()
         {
-            this.mContextMenu = new ContextMenu(new MenuItem[] {
-                serversItem = new MenuItem("服务器", new MenuItem[] {
-                    enableAllServerItem = new MenuItem("启用所有服务器", new EventHandler(this.enableAllServerItem_Click)),
-                    disableAllServerItem = new MenuItem("停用所有服务器", new EventHandler(this.disableAllServerItem_Click)),
+            this._contextMenu = new ContextMenu(new MenuItem[] {
+                _serversItem = new MenuItem("服务器", new MenuItem[] {
+                    _enableAllServerItem = new MenuItem("启用所有服务器", this.enableAllServerItem_Click),
+                    _disableAllServerItem = new MenuItem("停用所有服务器", this.disableAllServerItem_Click),
                     new MenuItem("-"),
-                    configItem = new MenuItem("编辑服务器", new EventHandler(this.configItem_Click))
+                    _configItem = new MenuItem("编辑服务器", this.configItem_Click)
                 }),
                 new MenuItem("-"),
-                autoStartupItem = new MenuItem("开机自启动", new EventHandler(this.autoStartupItem_Click)),
+                _autoStartupItem = new MenuItem("开机自启动", this.autoStartupItem_Click),
                 new MenuItem("-"),
-                logItem = new MenuItem("显示日志", new EventHandler(this.logItem_Click)),
-                new MenuItem("退出", new EventHandler(this.exitItem_Click))
+                _logItem = new MenuItem("显示日志", this.logItem_Click),
+                new MenuItem("更新", new MenuItem[]
+                {
+                    new MenuItem("检查更新", this.checkUpdateItem_Click),
+                    new MenuItem("-"),
+                   _autoCheckUpdateItem = new MenuItem("启动时检查更新", this.autoCheckUpdateItem_Click)
+                }),
+                _aboutItem = new MenuItem("关于", this.aboutItem_Click),
+                new MenuItem("-"),
+                new MenuItem("退出", this.exitItem_Click)
             });
-            autoStartupItem.Checked = AutoStartupUtil.Check();
+            _autoStartupItem.Checked = AutoStartupUtil.Check();
+
+            if (Configuration.GetConfigFile()["autoCheckUpdate"] == null)
+            {
+                JObject loCfg = Configuration.GetConfigFile();
+                loCfg["autoCheckUpdate"] = false;
+                Configuration.SaveConfigFile(loCfg);
+            }
+            _autoCheckUpdateItem.Checked = (bool)Configuration.GetConfigFile()["autoCheckUpdate"];
+            if (_autoCheckUpdateItem.Checked) UpdateController.GetInstance().StartChecking(true);
+        }
+
+        public void UpdateNotificationText()
+        {
+            _notifyIcon.Text = "KcptunLauncher " + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString()
+                             + Environment.NewLine
+                             + (Configuration.EnabledServerList.Count > 0 ? "正在运行的服务器" : "无正在运行的服务器")
+                             + Environment.NewLine;
+            Configuration.EnabledServerList.ForEach(enabledServer =>
+            {
+                _notifyIcon.Text += enabledServer + Environment.NewLine;
+            });
+        }
+
+        public void ShowNotification(int timeout, string title, string text, ToolTipIcon icon)
+        {
+            _notifyIcon.ShowBalloonTip(timeout, title, text, icon);
         }
 
         public void Exit()
         {
-            mProcessCtler.StopAll();
-            mNotifyIcon.Visible = false;
+            _processCtler.StopAll();
+            _notifyIcon.Visible = false;
         }
 
         private void enableAllServerItem_Click(object sender, EventArgs e)
@@ -121,7 +167,7 @@ namespace KcptunLauncher.Controller
             foreach (Server mServer in Configuration.Servers)
                 Configuration.EnabledServerList.Add(mServer.Name);
             foreach (Server server in Configuration.Servers)
-                mProcessCtler.Start(server);
+                _processCtler.Start(server);
             UpdateServersMenuItemsStatus();
             Configuration.UpdateEnabledServerList();
         }
@@ -129,12 +175,12 @@ namespace KcptunLauncher.Controller
         private void disableAllServerItem_Click(object sender, EventArgs e)
         {
             foreach (Server server in Configuration.Servers)
-                mProcessCtler.Stop(server.Name);
+                _processCtler.Stop(server.Name);
             Configuration.EnabledServerList.Clear();
             UpdateServersMenuItemsStatus();
             Configuration.UpdateEnabledServerList();
         }
-            
+
         private void configItem_Click(object sender, EventArgs e)
         {
             ConfigForm configForm = new ConfigForm();
@@ -143,17 +189,31 @@ namespace KcptunLauncher.Controller
 
         private void autoStartupItem_Click(object sender, EventArgs e)
         {
-            autoStartupItem.Checked = !autoStartupItem.Checked;
-            AutoStartupUtil.Set(autoStartupItem.Checked);
+            _autoStartupItem.Checked = !_autoStartupItem.Checked;
+            AutoStartupUtil.Set(_autoStartupItem.Checked);
+        }
+
+        private void autoCheckUpdateItem_Click(object sender, EventArgs e)
+        {
+            _autoCheckUpdateItem.Checked = !_autoCheckUpdateItem.Checked;
+
+            JObject loCfg = Configuration.GetConfigFile();
+            loCfg["autoCheckUpdate"] = _autoCheckUpdateItem.Checked;
+            Configuration.SaveConfigFile(loCfg);
+        }
+
+        private void checkUpdateItem_Click(object sender, EventArgs e)
+        {
+            UpdateController.GetInstance().StartChecking(false);
         }
 
         private void logItem_Click(object sender, EventArgs e)
         {
-            if (mLogForm == null || mLogForm.IsDisposed)
+            if (_logForm == null || _logForm.IsDisposed)
             {
-                mLogForm = new LogForm();
+                _logForm = new LogForm();
             }
-            mLogForm.Show();
+            _logForm.Show();
         }
 
         private void serverItem_Click(object sender, EventArgs e)
@@ -163,7 +223,7 @@ namespace KcptunLauncher.Controller
 
             if (mServerItem.Checked)
             {
-                if (!mProcessCtler.Start(mServerItem.Tag as Server))
+                if (!_processCtler.Start(mServerItem.Tag as Server))
                 {
                     mServerItem.Checked = false;
                     return;
@@ -179,7 +239,7 @@ namespace KcptunLauncher.Controller
             }
             else
             {
-                mProcessCtler.Stop(mServerItem.Text);
+                _processCtler.Stop(mServerItem.Text);
                 foreach (string enableServer in Configuration.EnabledServerList)
                 {
                     if (enableServer.Equals((mServerItem.Tag as Server).Name))
@@ -204,18 +264,22 @@ namespace KcptunLauncher.Controller
             }
         }
 
-        public void _ProcessLogReceived(object sender, EventArgs e)
+        private void aboutItem_Click(object sender, EventArgs e)
         {
-            if (mLogForm != null)
-            {
-                ProcessLogReceivedEventArgs args = e as ProcessLogReceivedEventArgs;
-                mLogForm.UpdateLog(args.Log + Environment.NewLine);
-            }
+            System.Diagnostics.Process.Start(@"https://github.com/Darnix/KcptunLauncher");
         }
 
         private void exitItem_Click(object sender, EventArgs e)
         {
             Application.Exit();
+        }
+
+        public void mProcessCtler_ProcessLogReceived(object sender, EventArgs e)
+        {
+            if (_logForm == null) return;
+
+            ProcessLogReceivedEventArgs args = e as ProcessLogReceivedEventArgs;
+            _logForm.UpdateLog(args.Log + Environment.NewLine);
         }
     }
 }

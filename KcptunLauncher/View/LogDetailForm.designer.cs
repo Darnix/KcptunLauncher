@@ -34,6 +34,7 @@
             this.timeBox = new System.Windows.Forms.TextBox();
             this.contentBox = new System.Windows.Forms.RichTextBox();
             this.timeLbl = new System.Windows.Forms.Label();
+            this.exReportLabel = new System.Windows.Forms.LinkLabel();
             this.SuspendLayout();
             // 
             // typeLbl
@@ -95,11 +96,27 @@
             this.timeLbl.TabIndex = 6;
             this.timeLbl.Text = "时间";
             // 
+            // exReportLabel
+            // 
+            this.exReportLabel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.exReportLabel.AutoSize = true;
+            this.exReportLabel.LinkArea = new System.Windows.Forms.LinkArea(10, 57);
+            this.exReportLabel.Location = new System.Drawing.Point(15, 180);
+            this.exReportLabel.Name = "exReportLabel";
+            this.exReportLabel.Size = new System.Drawing.Size(416, 21);
+            this.exReportLabel.TabIndex = 8;
+            this.exReportLabel.TabStop = true;
+            this.exReportLabel.Text = "报告错误或异常内容 https://github.com/Darnix/KcptunLauncher/issues";
+            this.exReportLabel.UseCompatibleTextRendering = true;
+            this.exReportLabel.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.exReportLabel_LinkClicked);
+            // 
             // LogDetailForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 17F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(484, 184);
+            this.ClientSize = new System.Drawing.Size(484, 210);
+            this.Controls.Add(this.exReportLabel);
             this.Controls.Add(this.timeBox);
             this.Controls.Add(this.timeLbl);
             this.Controls.Add(this.contentBox);
@@ -123,5 +140,6 @@
         private System.Windows.Forms.RichTextBox contentBox;
         private System.Windows.Forms.TextBox timeBox;
         private System.Windows.Forms.Label timeLbl;
+        private System.Windows.Forms.LinkLabel exReportLabel;
     }
 }

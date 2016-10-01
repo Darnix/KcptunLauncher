@@ -102,6 +102,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controller\UpdateController.cs" />
     <Compile Include="Util\AutoStartupUtil.cs" />
     <Compile Include="Util\Logger.cs" />
     <Compile Include="View\ClientSelectForm.cs">

@@ -10,10 +10,10 @@ namespace KcptunLauncher
     public class Configuration
     {
         [JsonIgnore]
-        public static string CONFIG_FILE_NAME = "config.json";
+        public const string ConfigFileName = "config.json";
 
         [JsonIgnore]
-        public static string CONFIG_FILE_PATH = AppDomain.CurrentDomain.BaseDirectory + @"\" + CONFIG_FILE_NAME;
+        public static readonly string ConfigFilePath = AppDomain.CurrentDomain.BaseDirectory + @"\" + ConfigFileName;
 
         [JsonProperty(PropertyName = "servers", NullValueHandling = NullValueHandling.Ignore)]
         public static List<Server> Servers;
@@ -25,7 +25,7 @@ namespace KcptunLauncher
         {
             try
             {
-                using (StreamReader reader = File.OpenText(CONFIG_FILE_PATH))
+                using (StreamReader reader = File.OpenText(ConfigFilePath))
                 {
                     return (JObject)JToken.ReadFrom(new JsonTextReader(reader));
                 }
@@ -46,17 +46,23 @@ namespace KcptunLauncher
 
             try
             {
-                if (!File.Exists(CONFIG_FILE_PATH))
+                if (!File.Exists(ConfigFilePath))
                 {
-                    File.Create(CONFIG_FILE_PATH).Close();
+                    File.Create(ConfigFilePath).Close();
                     SaveConfigFile(new JObject()
                     {
                         ["servers"] = new JArray(),
-                        ["enabledServer"] = new JArray()
+                        ["enabledServer"] = new JArray(),
+                        ["autoCheckUpdate"] = false,
+                        ["logFont"] = new JObject()
+                        {
+                            ["family"] = "Consolas",
+                            ["size"] = 9
+                        }
                     });
                 }
 
-                using (StreamReader reader = File.OpenText(CONFIG_FILE_PATH))
+                using (StreamReader reader = File.OpenText(ConfigFilePath))
                 {
                     JObject jObj = (JObject)JToken.ReadFrom(new JsonTextReader(reader));
 
@@ -91,13 +97,14 @@ namespace KcptunLauncher
 
         public static void SaveConfigFile(JObject cfgJObj)
         {
-            using (StreamWriter sw = new StreamWriter(File.Open(CONFIG_FILE_PATH, FileMode.Create)))
+            using (StreamWriter sw = new StreamWriter(File.Open(ConfigFilePath, FileMode.Create)))
             {
                 string jsonString = JsonConvert.SerializeObject(cfgJObj, Formatting.Indented);
                 sw.Write(jsonString);
                 sw.Flush();
                 sw.Close();
             }
+            Controller.MenuControlController.GetInstance().UpdateNotificationText();
         }
 
         public static void UpdateEnabledServerName(string serverName, string newServerName)

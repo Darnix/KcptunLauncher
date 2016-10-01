@@ -33,6 +33,7 @@
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.serverMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.clearLogMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.fontMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -55,7 +56,8 @@
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.serverMenuItem,
-            this.clearLogMenuItem});
+            this.clearLogMenuItem,
+            this.fontMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(434, 25);
@@ -74,6 +76,13 @@
             this.clearLogMenuItem.Size = new System.Drawing.Size(84, 21);
             this.clearLogMenuItem.Text = "清空日志(&C)";
             this.clearLogMenuItem.Click += new System.EventHandler(this.clearLogMenuItem_Click);
+            // 
+            // fontMenuItem
+            // 
+            this.fontMenuItem.Name = "fontMenuItem";
+            this.fontMenuItem.Size = new System.Drawing.Size(82, 21);
+            this.fontMenuItem.Text = "设置字体(&F)";
+            this.fontMenuItem.Click += new System.EventHandler(this.fontMenuItem_Click);
             // 
             // LogForm
             // 
@@ -101,5 +110,6 @@
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem serverMenuItem;
         private System.Windows.Forms.ToolStripMenuItem clearLogMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem fontMenuItem;
     }
 }

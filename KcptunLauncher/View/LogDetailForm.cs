@@ -54,5 +54,10 @@ namespace KcptunLauncher.View
             }
             return false;
         }
+
+        private void exReportLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            System.Diagnostics.Process.Start(@"https://github.com/Darnix/KcptunLauncher/issues");
+        }
     }
 }
