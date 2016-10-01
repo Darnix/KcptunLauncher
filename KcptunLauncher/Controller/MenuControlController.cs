@@ -145,10 +145,7 @@ namespace KcptunLauncher.Controller
                              + Environment.NewLine
                              + (Configuration.EnabledServerList.Count > 0 ? "正在运行的服务器" : "无正在运行的服务器")
                              + Environment.NewLine;
-            Configuration.EnabledServerList.ForEach(enabledServer =>
-            {
-                _notifyIcon.Text += enabledServer + Environment.NewLine;
-            });
+            Configuration.EnabledServerList.ForEach(enabledServer => { _notifyIcon.Text += enabledServer + Environment.NewLine; });
         }
 
         public void ShowNotification(int timeout, string title, string text, ToolTipIcon icon)
@@ -170,6 +167,7 @@ namespace KcptunLauncher.Controller
                 _processCtler.Start(server);
             UpdateServersMenuItemsStatus();
             Configuration.UpdateEnabledServerList();
+            UpdateNotificationText();
         }
 
         private void disableAllServerItem_Click(object sender, EventArgs e)
@@ -179,6 +177,7 @@ namespace KcptunLauncher.Controller
             Configuration.EnabledServerList.Clear();
             UpdateServersMenuItemsStatus();
             Configuration.UpdateEnabledServerList();
+            UpdateNotificationText();
         }
 
         private void configItem_Click(object sender, EventArgs e)
@@ -219,6 +218,7 @@ namespace KcptunLauncher.Controller
         private void serverItem_Click(object sender, EventArgs e)
         {
             MenuItem mServerItem = sender as MenuItem;
+            if (mServerItem == null) return;
             mServerItem.Checked = !mServerItem.Checked;
 
             if (mServerItem.Checked)
@@ -262,6 +262,7 @@ namespace KcptunLauncher.Controller
                 cfgJObj.Add("enabledServer", jArr);
                 Configuration.SaveConfigFile(cfgJObj);
             }
+            UpdateNotificationText();
         }
 
         private void aboutItem_Click(object sender, EventArgs e)

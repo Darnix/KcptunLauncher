@@ -23,12 +23,7 @@ namespace KcptunLauncher
 
                 if (!mutex.WaitOne(0, false))
                 {
-                    //Process[] oldProcesses = Process.GetProcessesByName("KcptunLauncher");
-                    //if (oldProcesses.Length > 0)
-                    //{
-                    //    Process oldProcess = oldProcesses[0];
-                    //}
-                    MenuControlController.GetInstance().ShowNotification(5, "KcptunLauncher", "程序已运行", ToolTipIcon.Info);
+                    MessageBox.Show("程序已运行", "KcptunLauncher");
                     return;
                 }
                 

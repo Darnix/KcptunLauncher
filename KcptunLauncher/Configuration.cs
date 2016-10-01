@@ -104,7 +104,6 @@ namespace KcptunLauncher
                 sw.Flush();
                 sw.Close();
             }
-            Controller.MenuControlController.GetInstance().UpdateNotificationText();
         }
 
         public static void UpdateEnabledServerName(string serverName, string newServerName)

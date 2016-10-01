@@ -264,7 +264,7 @@ namespace KcptunLauncher.View
             Configuration.RemoveServer((mSource.DataSource as List<Server>)[mServerList.SelectedIndex]);
             mSource.ResetBindings(false);
             if (mSource.Count > 0) mServerList.SelectedIndex = mServerList.Items.Count - 1;
-            MenuControlController.GetInstance().LoadServersMenuItem();
+            MenuControlController.GetInstance().LoadServersMenuItem();            
         }
 
         private void moveUpBtn_Click(object sender, EventArgs e)
