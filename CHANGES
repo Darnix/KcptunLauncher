@@ -1,2 +1,7 @@
 1.0
 - Initial release
+
+1.1.6118.42424
+- Add showing running server
+- Add log font settings
+- Add update checking
