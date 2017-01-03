@@ -137,6 +137,7 @@ namespace KcptunLauncher.Controller
             }
             _autoCheckUpdateItem.Checked = (bool)Configuration.GetConfigFile()["autoCheckUpdate"];
             if (_autoCheckUpdateItem.Checked) UpdateController.GetInstance().StartChecking(true);
+            UpdateController.GetInstance().StartCheckingKcptun();
         }
 
         public void UpdateNotificationText()
@@ -148,9 +149,10 @@ namespace KcptunLauncher.Controller
             Configuration.EnabledServerList.ForEach(enabledServer => { _notifyIcon.Text += enabledServer + Environment.NewLine; });
         }
 
-        public void ShowNotification(int timeout, string title, string text, ToolTipIcon icon)
+        public void ShowNotification(int timeout, string title, string text, ToolTipIcon icon, EventHandler handler)
         {
             _notifyIcon.ShowBalloonTip(timeout, title, text, icon);
+            _notifyIcon.BalloonTipClicked += handler;
         }
 
         public void Exit()
